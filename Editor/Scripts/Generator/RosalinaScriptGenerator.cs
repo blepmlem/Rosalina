@@ -19,22 +19,7 @@ internal class RosalinaScriptGenerator : IRosalinaGenerator
             throw new ArgumentException("An output file name is required.", nameof(outputFileName));
         }
 
-        var initializeDocumentMethod = SyntaxFactory.ExpressionStatement(
-            SyntaxFactory.InvocationExpression(
-                SyntaxFactory.IdentifierName("InitializeDocument")
-            )
-        );
-
-        MethodDeclarationSyntax onEnableMethod = RosalinaSyntaxFactory.CreateMethod("void", "OnEnable", SyntaxKind.PrivateKeyword)
-            .WithBody(SyntaxFactory.Block(initializeDocumentMethod));
-
-        ClassDeclarationSyntax @class = SyntaxFactory.ClassDeclaration(document.Name)
-           .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
-           .AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword))
-           .AddBaseListTypes(
-               SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseName(typeof(MonoBehaviour).Name))
-           )
-           .AddMembers(onEnableMethod);
+        ClassDeclarationSyntax @class = SyntaxFactory.ClassDeclaration(document.Name).AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword)).AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword));
 
         CompilationUnitSyntax compilationUnit = SyntaxFactory.CompilationUnit()
             .AddUsings(
