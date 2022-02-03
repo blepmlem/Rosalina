@@ -3,6 +3,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Object = UnityEngine.Object;
 
 public class RosalinaGenerateScriptMenuItem
 {
@@ -11,50 +12,53 @@ public class RosalinaGenerateScriptMenuItem
     [MenuItem(MenuItemPath, priority = 0)]
     public static void GenerateUIScript()
     {
-        string assetPath = AssetDatabase.GetAssetPath(Selection.activeObject);
-        var document = new UIDocumentAsset(assetPath);
+	    foreach (Object o in Selection.objects)
+	    {
+		    string assetPath = AssetDatabase.GetAssetPath(o);
+		    var document = new UIDocumentAsset(assetPath);
 
-        try
-        {
-            bool refreshAssetDatabase = false;
-            string scriptName = $"{document.Name}.cs";
-            string scriptPath = Path.Combine(document.Path, scriptName);
-            string generatedBindingsScriptName = $"{document.Name}.g.cs";
-            string generatedBindingsScriptPath = Path.Combine(document.Path, generatedBindingsScriptName);
+		    try
+		    {
+			    bool refreshAssetDatabase = false;
+			    string scriptName = $"{document.Name}.cs";
+			    string scriptPath = Path.Combine(document.Path, scriptName);
+			    string generatedBindingsScriptName = $"{document.Name}.g.cs";
+			    string generatedBindingsScriptPath = Path.Combine(document.Path, generatedBindingsScriptName);
 
-            if (!File.Exists(generatedBindingsScriptPath) && AskGenerateBindings())
-            {
-                Debug.Log($"[Rosalina]: Generating UI code behind for {generatedBindingsScriptPath}");
-                RosalinaGenerationResult result = new RosalinaBindingsGenerator().Generate(document, generatedBindingsScriptName);
+			    if (!File.Exists(generatedBindingsScriptPath) && AskGenerateBindings())
+			    {
+				    Debug.Log($"[Rosalina]: Generating UI code behind for {generatedBindingsScriptPath}");
+				    RosalinaGenerationResult result = new RosalinaBindingsGenerator().Generate(document, generatedBindingsScriptName);
 
-                File.WriteAllText(result.OutputFilePath, result.Code);
-                Debug.Log($"[Rosalina]: Done generating: {document.Name} (output: {result.OutputFilePath})");
-                refreshAssetDatabase = true;
-            }
+				    File.WriteAllText(result.OutputFilePath, result.Code);
+				    Debug.Log($"[Rosalina]: Done generating: {document.Name} (output: {result.OutputFilePath})");
+				    refreshAssetDatabase = true;
+			    }
 
-            if (!File.Exists(scriptPath) || File.Exists(scriptPath) && AskOverrideExistingScript())
-            {
-                Debug.Log($"[Rosalina]: Generating UI script for {scriptPath}");
-                RosalinaGenerationResult result = new RosalinaScriptGenerator().Generate(document, scriptName);
+			    if (!File.Exists(scriptPath) || File.Exists(scriptPath) && AskOverrideExistingScript())
+			    {
+				    Debug.Log($"[Rosalina]: Generating UI script for {scriptPath}");
+				    RosalinaGenerationResult result = new RosalinaScriptGenerator().Generate(document, scriptName);
 
-                File.WriteAllText(result.OutputFilePath, result.Code);
-                Debug.Log($"[Rosalina]: Done generating: {document.Name} (output: {result.OutputFilePath})");
-                refreshAssetDatabase = true;
-            }
+				    File.WriteAllText(result.OutputFilePath, result.Code);
+				    Debug.Log($"[Rosalina]: Done generating: {document.Name} (output: {result.OutputFilePath})");
+				    refreshAssetDatabase = true;
+			    }
 
-            if (refreshAssetDatabase)
-            {
-                AssetDatabase.Refresh();
-            }
-        }
-        catch (Exception e)
-        {
-            Debug.LogException(e, Selection.activeObject);
-        }
-        finally
-        {
-            EditorUtility.ClearProgressBar();
-        }
+			    if (refreshAssetDatabase)
+			    {
+				    AssetDatabase.Refresh();
+			    }
+		    }
+		    catch (Exception e)
+		    {
+			    Debug.LogException(e, Selection.activeObject);
+		    }
+		    finally
+		    {
+			    EditorUtility.ClearProgressBar();
+		    }
+	    }
     }
 
     [MenuItem(MenuItemPath, true)]
